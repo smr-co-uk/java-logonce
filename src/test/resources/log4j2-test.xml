@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="WARN">
   <Appenders>
+   <File name="File" fileName="logonce.log" append="false">
+      <PatternLayout pattern="%-5level %logger{36} - %msg%n"/>
+    </File>
     <Console name="Console" target="SYSTEM_OUT">
       <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
     </Console>
@@ -10,9 +13,9 @@
     <logger name="HelloWorld_Debug" level="DEBUG"/>
     <logger name="HelloWorld_Info" level="INFO"/>
     <logger name="HelloWorld_Warn" level="WARN"/>
-    <logger name="HelloWorld_Error" level="WARN"/>
+    <logger name="HelloWorld_Error" level="ERROR"/>
     <Root level="trace">
-      <AppenderRef ref="Console"/>
+      <AppenderRef ref="File"/>
     </Root>
   </Loggers>
 </Configuration>

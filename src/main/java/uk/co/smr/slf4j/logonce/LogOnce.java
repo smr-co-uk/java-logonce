@@ -35,17 +35,24 @@ import com.google.common.hash.Funnels;
 
 public class LogOnce implements Logger {
 
-    private BloomFilter<CharSequence> filter = BloomFilter.create(Funnels.stringFunnel(Charset.defaultCharset()), 1000);
+    private static final String ONCE = "ONCE: {}";
+	private final BloomFilter<CharSequence> filter = BloomFilter.create(Funnels.stringFunnel(Charset.defaultCharset()), 1000);
     private final Logger delegate;
+    private final boolean prefix;
 	private final AtomicLong ignored = new AtomicLong();
 	private final AtomicLong logged = new AtomicLong();
 	private final ReentrantLock lock = new ReentrantLock();
 
     public LogOnce(Logger logger) {
+    	this(logger, true);
+	}
+    
+    public LogOnce(Logger logger, boolean prefix) {
 		Preconditions.checkNotNull(logger, "Logger delegate must not be null");
 		this.delegate = logger;
-	}
-
+    	this.prefix = prefix;
+    }
+    
 	@Override
 	public String getName() {
 		return delegate.getName();
@@ -59,7 +66,7 @@ public class LogOnce implements Logger {
 	}
 
 	/**
-	 * @return the count of ignored messages
+	 * @return the count of logged messages
 	 */
 	public long getLogged() {
 		return logged.get();
@@ -106,7 +113,11 @@ public class LogOnce implements Logger {
 	        return;
 	    }
 	    if (registerMessageSync(msg)) { 
-	    	delegate.trace(marker, msg);
+	    	if (prefix) {
+	    		delegate.trace(marker, ONCE, msg);
+	    	} else {
+	    		delegate.trace(marker, msg);
+	    	}
 	    }
 	}
 
@@ -140,7 +151,13 @@ public class LogOnce implements Logger {
 	        return;
 	    }
 	    if (registerMessageSync(msg)) { 
-	    	delegate.trace(marker, msg, t);
+		    if (registerMessageSync(msg)) { 
+		    	if (prefix) {
+		    		delegate.trace(marker, MessageFormatter.arrayFormat(ONCE, new Object[] { msg }).getMessage(), t);
+		    	} else {
+		    		delegate.trace(marker, msg, t);
+		    	}
+		    }
 	    }
 	}
 
@@ -185,7 +202,11 @@ public class LogOnce implements Logger {
 	        return;
 	    }
 	    if (registerMessageSync(msg)) { 
-	    	delegate.debug(marker, msg);
+	    	if (prefix) {
+	    		delegate.debug(marker, ONCE, msg);
+	    	} else {
+	    		delegate.debug(marker, msg);
+	    	}
 	    }
 	}
 
@@ -219,7 +240,13 @@ public class LogOnce implements Logger {
 	        return;
 	    }
 	    if (registerMessageSync(msg)) { 
-	    	delegate.debug(marker, msg, t);
+		    if (registerMessageSync(msg)) { 
+		    	if (prefix) {
+		    		delegate.debug(marker, MessageFormatter.arrayFormat(ONCE, new Object[] { msg }).getMessage(), t);
+		    	} else {
+		    		delegate.debug(marker, msg, t);
+		    	}
+		    }
 	    }
 	}
 
@@ -264,7 +291,11 @@ public class LogOnce implements Logger {
 	        return;
 	    }
 	    if (registerMessageSync(msg)) { 
-	    	delegate.info(marker, msg);
+	    	if (prefix) {
+	    		delegate.info(marker, ONCE, msg);
+	    	} else {
+	    		delegate.info(marker, msg);
+	    	}
 	    }
 	}
 
@@ -298,7 +329,13 @@ public class LogOnce implements Logger {
 	        return;
 	    }
 	    if (registerMessageSync(msg)) { 
-	    	delegate.info(marker, msg, t);
+		    if (registerMessageSync(msg)) { 
+		    	if (prefix) {
+		    		delegate.info(marker, MessageFormatter.arrayFormat(ONCE, new Object[] { msg }).getMessage(), t);
+		    	} else {
+		    		delegate.info(marker, msg, t);
+		    	}
+		    }
 	    }
 	}
 
@@ -343,7 +380,11 @@ public class LogOnce implements Logger {
 	        return;
 	    }
 	    if (registerMessageSync(msg)) { 
-	    	delegate.warn(marker, msg);
+	    	if (prefix) {
+	    		delegate.warn(marker, ONCE, msg);
+	    	} else {
+	    		delegate.warn(marker, msg);
+	    	}
 	    }
 	}
 
@@ -377,7 +418,13 @@ public class LogOnce implements Logger {
 	        return;
 	    }
 	    if (registerMessageSync(msg)) { 
-	    	delegate.warn(marker, msg, t);
+		    if (registerMessageSync(msg)) { 
+		    	if (prefix) {
+		    		delegate.warn(marker, MessageFormatter.arrayFormat(ONCE, new Object[] { msg }).getMessage(), t);
+		    	} else {
+		    		delegate.warn(marker, msg, t);
+		    	}
+		    }
 	    }
 	}
 
@@ -423,7 +470,11 @@ public class LogOnce implements Logger {
 	        return;
 	    }
 	    if (registerMessageSync(msg)) { 
-	    	delegate.error(marker, msg);
+	    	if (prefix) {
+	    		delegate.error(marker, ONCE, msg);
+	    	} else {
+	    		delegate.error(marker, msg);
+	    	}
 	    }
 	}
 
@@ -457,7 +508,11 @@ public class LogOnce implements Logger {
 	        return;
 	    }
 	    if (registerMessageSync(msg)) { 
-	    	delegate.error(marker, msg, t);
+	    	if (prefix) {
+	    		delegate.error(marker, MessageFormatter.arrayFormat(ONCE, new Object[] { msg }).getMessage(), t);
+	    	} else {
+	    		delegate.error(marker, msg, t);
+	    	}
 	    }
 	}
 

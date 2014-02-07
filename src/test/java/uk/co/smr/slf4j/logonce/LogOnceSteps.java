@@ -1,6 +1,14 @@
 package uk.co.smr.slf4j.logonce;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 
 import org.apache.logging.log4j.Level;
 import org.jbehave.core.annotations.Given;
@@ -11,11 +19,16 @@ import org.slf4j.LoggerFactory;
 
 public class LogOnceSteps {
 
-	protected LogOnce logger;
+	private LogOnce logger;
 	
 	@Given("a logger $logger")
 	public void logOnce(@Named("logger") String loggerName) {
     	logger = new LogOnce(LoggerFactory.getLogger(loggerName));
+	}
+ 
+	@Given("a logger without ONCE: $logger")
+	public void logOnceWithoutOnce(@Named("logger") String loggerName) {
+    	logger = new LogOnce(LoggerFactory.getLogger(loggerName), false);
 	}
  
 	@When("I log one message $message for $times times at level $level")
@@ -52,11 +65,54 @@ public class LogOnceSteps {
 			break;
 		}
 	}
- 
+	
+	@When("I log $several different messages made from $message for $times times at level $level")
+	public void whenILogSeveralMessageAtLevel(@Named("message") String message
+			, @Named("times") int times
+			, @Named("level") Level level
+			, @Named("several") int several) {
+		for (int i=0; i < several; i++) {
+			whenILogAMessageAtLevel(message + i, times, level);
+		}
+	}
+	
 	@Then("ignored should equal $ignored and logged should equal $logged")
 	public void ingnoredShouldEqual(@Named("ignored") int ignored, @Named("logged") int logged) {
 		assertEquals(logger.getIgnored(), ignored);
 		assertEquals(logger.getLogged(), logged);
+	}
+	
+	@Then("logger should contain Hello World at $level if logged $logged is greater than zero")
+	public void loggerShouldContain(@Named("level") String level, @Named("logged") int logged) throws Exception {
+		if (logged == 0) {
+			return;
+		}
+		File log = new File("logonce.log");
+		assertTrue("logonce.log should exist", log.exists() && log.canRead());
+		String lastline = getLastLine(log);
+		assertNotNull(lastline);
+		assertTrue("Should contain Hello World", lastline.contains("Hello World"));
+		assertTrue("Should contain ONCE:", lastline.contains("ONCE:"));
+		assertTrue("Should contain " + level, lastline.contains(level));
+	}
+
+	private String getLastLine(File log)
+			throws FileNotFoundException, IOException {
+		String lastline = null;
+		BufferedReader reader = null;
+		try {
+			reader = new BufferedReader(new FileReader(log));
+			String line = null;
+			// not very efficient, but its only a small file
+			while ((line = reader.readLine()) != null) {
+				lastline = line;
+			}
+		} finally {
+			if (reader != null) {
+				reader.close();
+			}
+		}
+		return lastline;
 	}
 	
 	@When(value="I log a formatted message $message with one parameter $parameter for $times times at level $level")
