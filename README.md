@@ -9,6 +9,8 @@ The Bloomfilter is not thread safe so a Reentrant lock ensures it's consistently
 
 Continuous Integration results can be seen here https://travis-ci.org/smr-co-uk/java-logonce
 
+Readable JBehave BBD acceptance tests are used to test the code.
+
 Its used in conjunction with an existing logger as follows:-
 
 ```java
@@ -22,4 +24,20 @@ to the start of the message to indicate LogOnce is being used. The default is to
 
 ```java
 LogOnce logonce = new LogOnce(logger, false); // to turn off ONCE: prefix
+```
+
+## To Install
+Clone from github https://github.com/smr-co-uk/java-logonce.git or download a zip file 
+https://github.com/smr-co-uk/java-logonce/archive/master.zip
+The project is configured to work with Eclipse http://www.eclipse.org/
+
+## To Test
+After installing, on U/Linux in a terminal window type
+```
+gradlew check
+```
+
+On Windows in a command window type
+```
+gradlew.bat check
 ```
