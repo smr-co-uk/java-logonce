@@ -1,10 +1,13 @@
 java-logonce
 ============
+## User Story
+As a developer I want to log state so that I can debug a production issue without adding a lot of duplicates to the log file.
 
+## Description
 A thread safe slf4j logger that only logs on the first instance of message it sees 
 thereafter that instance is ignored until the logger is garbage collected. 
 LogOnce is backed by a space efficient Bloomer filter from Guava which may result in some false positives so some messages
-may be logged more than once. 
+may be not be logged. The expected false positive probability is 3%.
 The Bloomfilter is not thread safe so a Reentrant lock ensures it's consistently updated in a multi-threaded environment.
 
 Continuous Integration results can be seen here https://travis-ci.org/smr-co-uk/java-logonce
