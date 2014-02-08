@@ -44,3 +44,8 @@ On Windows in a command window type
 ```
 gradlew.bat check
 ```
+
+## Road Map
+* Bloomfilter suffer from false positives so the next type of LogOnce logger will ensure there are no false positives.
+* Add a factory method to specify what your requirements are in terms of false positives, concurrency etc...
+
