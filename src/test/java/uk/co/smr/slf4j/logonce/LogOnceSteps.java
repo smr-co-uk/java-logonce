@@ -10,12 +10,12 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 
-import org.apache.logging.log4j.Level;
 import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.Named;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.slf4j.LoggerFactory;
+import org.slf4j.ext.XLogger.Level;
 
 public class LogOnceSteps {
 
