@@ -10,12 +10,16 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 
+import org.jbehave.core.annotations.AfterStories;
 import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.Named;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.slf4j.LoggerFactory;
 import org.slf4j.ext.XLogger.Level;
+
+import uk.co.smr.slf4j.logonce.strategy.BloomFilterStrategy;
+import uk.co.smr.slf4j.logonce.strategy.SetStrategy;
 
 public class LogOnceSteps {
 
@@ -28,7 +32,20 @@ public class LogOnceSteps {
  
 	@Given("a logger without ONCE: $logger")
 	public void logOnceWithoutOnce(@Named("logger") String loggerName) {
-    	logger = new LogOnce(LoggerFactory.getLogger(loggerName), false);
+    	logger = new LogOnce(LoggerFactory.getLogger(loggerName), false, null);
+	}
+ 
+	@Given("a matching strategy $strategy and logger $logger")
+	public void logOnceWithStrategy(@Named("strategy") String strategy, @Named("logger") String loggerName) {
+		MatchingStrategy thestrategy = null;
+		switch (strategy) {
+		case "Set":
+			thestrategy = new SetStrategy();
+			break;
+		default:
+			thestrategy = new BloomFilterStrategy();
+		}
+    	logger = new LogOnce(LoggerFactory.getLogger(loggerName), true, thestrategy);
 	}
  
 	@When("I log one message $message for $times times at level $level")
@@ -71,15 +88,17 @@ public class LogOnceSteps {
 			, @Named("times") int times
 			, @Named("level") Level level
 			, @Named("several") int several) {
-		for (int i=0; i < several; i++) {
-			whenILogAMessageAtLevel(message + i, times, level);
+		for (int i=0; i < times; i++) {
+			for (int j=0; j < several; j++) {
+				whenILogAMessageAtLevel(message + j, 1, level);
+			}
 		}
 	}
 	
 	@Then("ignored should equal $ignored and logged should equal $logged")
 	public void ingnoredShouldEqual(@Named("ignored") int ignored, @Named("logged") int logged) {
-		assertEquals(logger.getIgnored(), ignored);
-		assertEquals(logger.getLogged(), logged);
+		assertEquals("ignored error", ignored, logger.getIgnored());
+		assertEquals("logged error", logged, logger.getLogged());
 	}
 	
 	@Then("logger should contain Hello World at $level if logged $logged is greater than zero")
@@ -190,6 +209,11 @@ public class LogOnceSteps {
 		default:
 			break;
 		}
+	}
+	
+	@AfterStories
+	public void cleanup() {
+		System.out.println("Cleanup");
 	}
  
 // Redundant, just playing around

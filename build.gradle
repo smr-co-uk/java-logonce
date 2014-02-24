@@ -8,6 +8,14 @@ version = '0.0.1'
 
 repositories {
     mavenCentral()
+	maven {
+		// for jbehave-junit-runner:1.1.0-SNAPSHOT
+		url 'https://oss.sonatype.org/content/repositories/snapshots'
+	}
+	ivy {
+		url "../gradle.repo"
+		layout "maven"
+	}
 }
 
 dependencies {
@@ -16,22 +24,30 @@ dependencies {
 	compile 'org.apache.logging.log4j.adapters:log4j-slf4j-impl:2.0-beta4' 	// beta 	
 	compile 'com.google.guava:guava:16.0'
 	compile 'org.slf4j:slf4j-api:1.7.6' 								
+	testCompile 'de.codecentric:jbehave-junit-runner:1.1.0-SNAPSHOT'
 	testCompile group: 'junit', name: 'junit', version: '4.11'
 	testCompile 'org.jbehave:jbehave-core:4.0-beta-4'						// beta	
-	testCompile 'de.codecentric:jbehave-junit-runner:1.0.2'
 }
 
 task wrapper(type: Wrapper) {
 	gradleVersion = '1.10'
 }
 
-task copyStories(type: Copy) {
-	from('src/test/java') {
-         include '**/*.story'
-     }
-	into 'build/classes/test'
+
+task cleanOthers(type: Delete) << {
+	def File srcDir = new File('../' + project.name + '/target')
+	def collection = files { srcDir.listFiles() }
+	collection.collect { relativePath(it) }.sort().each { println 'deleting... ' + it ; delete it }
+
+	srcDir = new File('../' + project.name + '/bin')
+	collection = files { srcDir.listFiles() }
+	collection.collect { relativePath(it) }.sort().each { println 'deleting... ' + it ; delete it }
+
+	// doesn't work :(
+	delete 'target'
+	delete 'bin' 
 }
 
-check.dependsOn copyStories
+clean.dependsOn cleanOthers
 
 

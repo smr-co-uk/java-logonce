@@ -1,3 +1,8 @@
+Narrative:
+In order to logonce
+As a client
+I want to log messages once 
+
 Scenario: Simple Message
 
 Given a logger <logger> 
@@ -134,32 +139,32 @@ Examples:
 |logger|message|times|level|ignored|logged|several|
 |Any|Hello World|3|TRACE|10|5|5|
 |--
-|HelloWorld_Trace|Hello World|3|TRACE|10|5|5|    
-|HelloWorld_Trace|Hello World|3|DEBUG|10|5|5|    
-|HelloWorld_Trace|Hello World|3|INFO|10|5|5|    
-|HelloWorld_Trace|Hello World|3|WARN|10|5|5|    
-|HelloWorld_Trace|Hello World|3|ERROR|10|5|5|    
+|HelloWorld_Trace|Hello World|3|TRACE|1000|500|500|    
+|HelloWorld_Trace|Hello World|3|DEBUG|1000|500|500|    
+|HelloWorld_Trace|Hello World|3|INFO|1000|500|500|    
+|HelloWorld_Trace|Hello World|3|WARN|1000|500|500|    
+|HelloWorld_Trace|Hello World|3|ERROR|1000|500|500|    
 |--
 |HelloWorld_Debug|Hello World|3|TRACE|0|0|5|   
-|HelloWorld_Debug|Hello World|3|DEBUG|10|5|5|  
-|HelloWorld_Debug|Hello World|3|INFO|10|5|5|    
-|HelloWorld_Debug|Hello World|3|WARN|10|5|5|    
-|HelloWorld_Debug|Hello World|3|ERROR|10|5|5|    
+|HelloWorld_Debug|Hello World|3|DEBUG|1000|500|500|  
+|HelloWorld_Debug|Hello World|3|INFO|1000|500|500|    
+|HelloWorld_Debug|Hello World|3|WARN|1000|500|500|    
+|HelloWorld_Debug|Hello World|3|ERROR|1000|500|500|    
 |--
 |HelloWorld_Info|Hello World|3|TRACE|0|0|5| 
 |HelloWorld_Info|Hello World|3|DEBUG|0|0|5|
-|HelloWorld_Info|Hello World|3|INFO|10|5|5|    
-|HelloWorld_Info|Hello World|3|WARN|10|5|5|    
-|HelloWorld_Info|Hello World|3|ERROR|10|5|5|    
+|HelloWorld_Info|Hello World|3|INFO|1000|500|500|    
+|HelloWorld_Info|Hello World|3|WARN|1000|500|500|    
+|HelloWorld_Info|Hello World|3|ERROR|1000|500|500|    
 |--
 |HelloWorld_Warn|Hello World|3|TRACE|0|0|5|  
 |HelloWorld_Warn|Hello World|3|DEBUG|0|0|5|
 |HelloWorld_Warn|Hello World|3|INFO|0|0|5| 
-|HelloWorld_Warn|Hello World|3|WARN|10|5|5|    
-|HelloWorld_Warn|Hello World|3|ERROR|10|5|5|    
+|HelloWorld_Warn|Hello World|3|WARN|1000|500|500|    
+|HelloWorld_Warn|Hello World|3|ERROR|1000|500|500|    
 |--
 |HelloWorld_Error|Hello World|3|TRACE|0|0|5|    
 |HelloWorld_Error|Hello World|3|DEBUG|0|0|5|
 |HelloWorld_Error|Hello World|3|INFO|0|0|5| 
 |HelloWorld_Error|Hello World|3|WARN|0|0|5|  
-|HelloWorld_Error|Hello World|3|ERROR|10|5|5|    
+|HelloWorld_Error|Hello World|3|ERROR|1000|500|500|    
