@@ -29,7 +29,7 @@ public class LogOnceStories extends JUnitStories {
             .useStoryLoader(new LoadFromClasspath(this.getClass()))  
             // CONSOLE and TXT reporting
             .useStoryReporterBuilder(new StoryReporterBuilder().withDefaultFormats().
-            		withFormats(Format.CONSOLE, Format.TXT))
+            		withFormats(Format.CONSOLE, Format.TXT, Format.XML, Format.HTML))
             ; 
     }
  
