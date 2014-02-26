@@ -15,19 +15,36 @@ import com.google.common.base.Preconditions;
  * Its useful in a context when only one message per process instance should be logged to guard 
  * against too many messages hitting a log file or if an error condition needs to be logged but
  * only once. It uses slf4j for greater portability and more efficient logging. 
- * A space efficient BloomFilter is used but it will occasionally result in false positives. 
- * The class follows the slf4j pattern by checking the is<level>Enabled first.
- * The class is thread safe.
+ * 
+ * >p>Different matching strategies can used for either efficient storage but with some messages being logged twice
+ * or less efficient storage and no messages logged twice. 
+ * 
+ * <p>The class follows the slf4j pattern by checking the is<level>Enabled first.
  * <p>
- * Its used in conjunction with an existing logger as follows:-
+ * This class is thread safe but the strategy may not be.
  * <p>
- * <code>
- * Logger logger = LoggerFactory.getLogger("HelloWorld");
+ * Its used in conjunction with an existing logger. 
+ * Get a default thread safe but potentially unreliable strategy as follows:-
+ * <p><code>
+ * Logger logger = LoggerFactory.getLogger(YourClass.class);
  * <br>
  * LogOnce logonce = new LogOnce(logger);
  * </code>
  * 
+ * <p>
+ * Or create a safe reliable logger as follows:-
+ * <p><code>
+ * Logger logger = LoggerFactory.getLogger(YourClass.class);
+ * <br>
+ * LogOnce logonce = new LogOnce(logger,  MatchingStrategyFactory.create(Safety.safe, Reliability.all));
+ * </code>
  * @author Peter Lappo (smr.co.uk)
+ * 
+ * <p>
+ * By default "ONCE: " is prefixed to the message. This can be turned off with the prefix 
+ * flag set false at object creation time. 
+ * 
+ * @see <a href="https://github.com/smr-co-uk/java-logonce/blob/master/LICENSE">License and Warranty</a>
  *
  */
 
@@ -42,6 +59,10 @@ public class LogOnce implements Logger {
 
     public LogOnce(Logger logger) {
     	this(logger, true, new ThreadSafeBloomFilterStrategy());
+	}
+    
+    public LogOnce(Logger logger, MatchingStrategy strategy) {
+    	this(logger, true, strategy);
 	}
     
     public LogOnce(Logger logger, boolean prefix, MatchingStrategy strategy) {
@@ -111,7 +132,7 @@ public class LogOnce implements Logger {
 	    if (!delegate.isTraceEnabled(marker)){
 	        return;
 	    }
-	    if (logMessage(msg)) { 
+	    if (shouldLogMessage(msg)) { 
 	    	if (prefix) {
 	    		delegate.trace(marker, ONCE, msg);
 	    	} else {
@@ -149,14 +170,12 @@ public class LogOnce implements Logger {
 	    if (!delegate.isTraceEnabled(marker)){
 	        return;
 	    }
-	    if (logMessage(msg)) { 
-		    if (logMessage(msg)) { 
-		    	if (prefix) {
-		    		delegate.trace(marker, MessageFormatter.arrayFormat(ONCE, new Object[] { msg }).getMessage(), t);
-		    	} else {
-		    		delegate.trace(marker, msg, t);
-		    	}
-		    }
+	    if (shouldLogMessage(msg)) { 
+	    	if (prefix) {
+	    		delegate.trace(marker, MessageFormatter.arrayFormat(ONCE, new Object[] { msg }).getMessage(), t);
+	    	} else {
+	    		delegate.trace(marker, msg, t);
+	    	}
 	    }
 	}
 
@@ -200,7 +219,7 @@ public class LogOnce implements Logger {
 	    if (!delegate.isDebugEnabled(marker)){
 	        return;
 	    }
-	    if (logMessage(msg)) { 
+	    if (shouldLogMessage(msg)) { 
 	    	if (prefix) {
 	    		delegate.debug(marker, ONCE, msg);
 	    	} else {
@@ -238,14 +257,12 @@ public class LogOnce implements Logger {
 	    if (!delegate.isDebugEnabled(marker)){
 	        return;
 	    }
-	    if (logMessage(msg)) { 
-		    if (logMessage(msg)) { 
-		    	if (prefix) {
-		    		delegate.debug(marker, MessageFormatter.arrayFormat(ONCE, new Object[] { msg }).getMessage(), t);
-		    	} else {
-		    		delegate.debug(marker, msg, t);
-		    	}
-		    }
+	    if (shouldLogMessage(msg)) { 
+	    	if (prefix) {
+	    		delegate.debug(marker, MessageFormatter.arrayFormat(ONCE, new Object[] { msg }).getMessage(), t);
+	    	} else {
+	    		delegate.debug(marker, msg, t);
+	    	}
 	    }
 	}
 
@@ -289,7 +306,7 @@ public class LogOnce implements Logger {
 	    if (!delegate.isInfoEnabled(marker)){
 	        return;
 	    }
-	    if (logMessage(msg)) { 
+	    if (shouldLogMessage(msg)) { 
 	    	if (prefix) {
 	    		delegate.info(marker, ONCE, msg);
 	    	} else {
@@ -327,14 +344,12 @@ public class LogOnce implements Logger {
 	    if (!delegate.isInfoEnabled(marker)){
 	        return;
 	    }
-	    if (logMessage(msg)) { 
-		    if (logMessage(msg)) { 
-		    	if (prefix) {
-		    		delegate.info(marker, MessageFormatter.arrayFormat(ONCE, new Object[] { msg }).getMessage(), t);
-		    	} else {
-		    		delegate.info(marker, msg, t);
-		    	}
-		    }
+	    if (shouldLogMessage(msg)) { 
+	    	if (prefix) {
+	    		delegate.info(marker, MessageFormatter.arrayFormat(ONCE, new Object[] { msg }).getMessage(), t);
+	    	} else {
+	    		delegate.info(marker, msg, t);
+	    	}
 	    }
 	}
 
@@ -378,7 +393,7 @@ public class LogOnce implements Logger {
 	    if (!delegate.isWarnEnabled(marker)){
 	        return;
 	    }
-	    if (logMessage(msg)) { 
+	    if (shouldLogMessage(msg)) { 
 	    	if (prefix) {
 	    		delegate.warn(marker, ONCE, msg);
 	    	} else {
@@ -416,14 +431,12 @@ public class LogOnce implements Logger {
 	    if (!delegate.isWarnEnabled(marker)){
 	        return;
 	    }
-	    if (logMessage(msg)) { 
-		    if (logMessage(msg)) { 
-		    	if (prefix) {
-		    		delegate.warn(marker, MessageFormatter.arrayFormat(ONCE, new Object[] { msg }).getMessage(), t);
-		    	} else {
-		    		delegate.warn(marker, msg, t);
-		    	}
-		    }
+	    if (shouldLogMessage(msg)) { 
+	    	if (prefix) {
+	    		delegate.warn(marker, MessageFormatter.arrayFormat(ONCE, new Object[] { msg }).getMessage(), t);
+	    	} else {
+	    		delegate.warn(marker, msg, t);
+	    	}
 	    }
 	}
 
@@ -468,7 +481,7 @@ public class LogOnce implements Logger {
 	    if (!delegate.isErrorEnabled(marker)){
 	        return;
 	    }
-	    if (logMessage(msg)) { 
+	    if (shouldLogMessage(msg)) { 
 	    	if (prefix) {
 	    		delegate.error(marker, ONCE, msg);
 	    	} else {
@@ -506,7 +519,7 @@ public class LogOnce implements Logger {
 	    if (!delegate.isErrorEnabled(marker)){
 	        return;
 	    }
-	    if (logMessage(msg)) { 
+	    if (shouldLogMessage(msg)) { 
 	    	if (prefix) {
 	    		delegate.error(marker, MessageFormatter.arrayFormat(ONCE, new Object[] { msg }).getMessage(), t);
 	    	} else {
@@ -515,7 +528,7 @@ public class LogOnce implements Logger {
 	    }
 	}
 
-	private boolean logMessage(String msg) {
+	private boolean shouldLogMessage(String msg) {
 		boolean logmsg = strategy.add(msg);
 		if (logmsg) {
 			logged.incrementAndGet();

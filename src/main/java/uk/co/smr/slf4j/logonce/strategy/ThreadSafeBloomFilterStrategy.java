@@ -6,12 +6,25 @@ import java.util.concurrent.locks.ReentrantLock;
 import com.google.common.hash.BloomFilter;
 import com.google.common.hash.Funnels;
 
+/**
+ * A space efficient BloomFilter is used to filter logged messages. 
+ * It will occasionally result in false positives. That is, sometimes
+ * messages will be logged more than once.
+ * 
+ * <p>This class is thread safe.
+ * 
+ * @author Peter Lappo (smr.co.uk)
+ * 
+ * @see <a href="https://github.com/smr-co-uk/java-logonce/blob/master/LICENSE">License and Warranty</a>
+ *
+ */
+
 public class ThreadSafeBloomFilterStrategy extends BloomFilterStrategy {
 	private final ReentrantLock lock = new ReentrantLock();
 	private final BloomFilter<CharSequence> filter;
 	
 	public ThreadSafeBloomFilterStrategy() {
-		filter = BloomFilter.create(Funnels.stringFunnel(Charset.defaultCharset()), 1000);
+		this(2000, 0.03);
 	}
 
 	/**

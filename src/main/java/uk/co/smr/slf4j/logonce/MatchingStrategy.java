@@ -1,8 +1,12 @@
 package uk.co.smr.slf4j.logonce;
 
 /**
+ * Interface for matching strategy plugins. 
+ * The strategy is responsible for deciding if the message has been seen before.
  * 
- * @author peter
+ * @author Peter Lappo (smr.co.uk)
+ * 
+ * @see <a href="https://github.com/smr-co-uk/java-logonce/blob/master/LICENSE">License and Warranty</a>
  *
  */
 

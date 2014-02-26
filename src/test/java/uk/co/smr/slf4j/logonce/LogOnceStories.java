@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.jbehave.core.configuration.Configuration;
 import org.jbehave.core.configuration.MostUsefulConfiguration;
+import org.jbehave.core.failures.FailingUponPendingStep;
 import org.jbehave.core.io.CodeLocations;
 import org.jbehave.core.io.LoadFromClasspath;
 import org.jbehave.core.io.StoryFinder;
@@ -23,10 +24,10 @@ public class LogOnceStories extends JUnitStories {
     @Override
     public Configuration configuration() {
         return new MostUsefulConfiguration()
-//        	.usePendingStepStrategy(new FailingUponPendingStep())
+        	.usePendingStepStrategy(new FailingUponPendingStep())
             // where to find the stories
             .useStoryLoader(new LoadFromClasspath(this.getClass()))  
-//            // CONSOLE and TXT reporting
+            // CONSOLE and TXT reporting
             .useStoryReporterBuilder(new StoryReporterBuilder().withDefaultFormats().
             		withFormats(Format.CONSOLE, Format.TXT))
             ; 
