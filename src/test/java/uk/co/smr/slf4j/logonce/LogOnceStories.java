@@ -1,13 +1,14 @@
 package uk.co.smr.slf4j.logonce;
 
+import java.util.Arrays;
 import java.util.List;
 
+import org.jbehave.core.annotations.UsingEmbedder;
 import org.jbehave.core.configuration.Configuration;
 import org.jbehave.core.configuration.MostUsefulConfiguration;
+import org.jbehave.core.embedder.Embedder;
 import org.jbehave.core.failures.FailingUponPendingStep;
-import org.jbehave.core.io.CodeLocations;
 import org.jbehave.core.io.LoadFromClasspath;
-import org.jbehave.core.io.StoryFinder;
 import org.jbehave.core.junit.JUnitStories;
 import org.jbehave.core.reporters.Format;
 import org.jbehave.core.reporters.StoryReporterBuilder;
@@ -18,6 +19,8 @@ import org.junit.runner.RunWith;
 import de.codecentric.jbehave.junit.monitoring.JUnitReportingRunner;
 
 @RunWith(JUnitReportingRunner.class)
+@UsingEmbedder(embedder = Embedder.class, generateViewAfterStories = true,
+	ignoreFailureInStories = true, ignoreFailureInView = false,  verboseFailures = true)
 public class LogOnceStories extends JUnitStories {
  
     // Here we specify the configuration, starting from default MostUsefulConfiguration, and changing only what is needed
@@ -42,7 +45,15 @@ public class LogOnceStories extends JUnitStories {
     
     @Override
     protected List<String> storyPaths() {
-        return new StoryFinder().findPaths(CodeLocations.codeLocationFromClass(this.getClass()), "**/*.story", "");
+    	return Arrays.asList(
+    			"uk/co/smr/slf4j/logonce/log_once_using_all_filter_strategies.story",
+    			"uk/co/smr/slf4j/logonce/log_once_using_default_filter_strategy.story");
+//        return new StoryFinder().findPaths(CodeLocations.codeLocationFromClass(this.getClass()), "**/*.story", "");
     }
+
+//    @Test
+//    public void run() throws Throwable {
+//        throw new UnsupportedOperationException("run");
+//    }
 
 }

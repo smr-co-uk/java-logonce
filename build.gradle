@@ -39,15 +39,36 @@ task cleanOthers(type: Delete) << {
 	def collection = files { srcDir.listFiles() }
 	collection.collect { relativePath(it) }.sort().each { println 'deleting... ' + it ; delete it }
 
-	srcDir = new File('../' + project.name + '/bin')
-	collection = files { srcDir.listFiles() }
-	collection.collect { relativePath(it) }.sort().each { println 'deleting... ' + it ; delete it }
+//	srcDir = new File('../' + project.name + '/bin')
+//	collection = files { srcDir.listFiles() }
+//	collection.collect { relativePath(it) }.sort().each { println 'deleting... ' + it ; delete it }
 
 	// doesn't work :(
 	delete 'target'
-	delete 'bin' 
+	//delete 'bin' 
 }
 
 clean.dependsOn cleanOthers
 
+configurations { jbehave }
 
+//test {
+//  onlyIf { false } // Disable standard tests
+//}
+
+//task acceptStories(type: Test) {
+//	ignoreFailures = true
+//	doFirst {
+//	  // Need 'target' directory on *nix systems to get any output
+//	  file('target').mkdirs()
+//  
+//	  def filter = System.getProperty('bdd.stories')
+//	  if (filter == null) {
+//		filter = '*'
+//	  }
+//	  def stories = sourceSets.test.resources.matching {
+//		it.include filter
+//	  }.asPath
+//	  systemProperty('bdd.stories', stories)
+//	}
+//  }
