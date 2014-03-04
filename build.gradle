@@ -1,75 +1,158 @@
+/*
+ 
+To do a release to maven central
+	gradlew -P release uploadArchives
+
+To do a snapshot release to maven snapshots
+ 	gradlew -P snapshot uploadArchives
+
+To install locally
+	gradlew uploadArchives
+or
+	gradlew install
+ 
+ */
+
 apply plugin: 'java'
 apply plugin: 'eclipse'
+apply plugin: 'maven'
+apply plugin: 'signing'
+apply plugin: 'idea'
 
 defaultTasks 'check'
 
 sourceCompatibility = 1.6
 targetCompatibility = 1.6
+group = 'uk.co.smr'
+ext.packaging = 'jar'
 version = '0.1.2'
+
+def isDevBuild = true 
+def isReleaseBuild = false
+def isSnapshotBuild = false
+def sonatypeRepositoryUrl
+
+//set build variables based on build type (release, snapshot, development)
+if(hasProperty("release")) {
+    isReleaseBuild = true
+    sonatypeRepositoryUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2"
+} else if (hasProperty("snapshot")) {
+    isSnapshotBuild = true
+    version += "-SNAPSHOT"
+    sonatypeRepositoryUrl = "https://oss.sonatype.org/content/repositories/snapshots"
+} else {
+    isDevBuild = true
+}
+
+println 'Config: isReleaseBuild=' + isReleaseBuild + ' isDevBuild=' + isDevBuild + ' isSnapshotBuild=' + isSnapshotBuild
 
 repositories {
     mavenCentral()
-	maven {
-		// for jbehave-junit-runner:1.1.0-SNAPSHOT
-		url 'https://oss.sonatype.org/content/repositories/snapshots'
-	}
-	ivy {
-		url "../gradle.repo"
-		layout "maven"
-	}
+    maven {
+        // for jbehave-junit-runner:1.1.0-SNAPSHOT
+        url 'https://oss.sonatype.org/content/repositories/snapshots'
+    }
+    ivy {
+        url "../gradle.repo"
+        layout "maven"
+    }
 }
 
 dependencies {
-	compile 'org.apache.logging.log4j:log4j-api:2.0-rc1' 			 	
-	compile 'org.apache.logging.log4j:log4j-core:2.0-rc1'  				
-	compile 'org.apache.logging.log4j.adapters:log4j-slf4j-impl:2.0-beta4' 	// beta 	
-	compile 'com.google.guava:guava:16.0'
-	compile 'org.slf4j:slf4j-api:1.7.6' 								
-	testCompile 'de.codecentric:jbehave-junit-runner:1.1.0'
-	testCompile group: 'junit', name: 'junit', version: '4.11'
-	testCompile 'org.jbehave:jbehave-core:4.0-beta-4'						// beta	
+    compile 'org.apache.logging.log4j:log4j-api:2.0-rc1'                  
+    compile 'org.apache.logging.log4j:log4j-core:2.0-rc1'                  
+    compile 'org.apache.logging.log4j.adapters:log4j-slf4j-impl:2.0-beta4'     // beta     
+    compile 'com.google.guava:guava:16.0'
+    compile 'org.slf4j:slf4j-api:1.7.6'                                 
+    testCompile 'de.codecentric:jbehave-junit-runner:1.1.0'
+    testCompile group: 'junit', name: 'junit', version: '4.11'
+    testCompile 'org.jbehave:jbehave-core:4.0-beta-4'                        // beta    
 }
+
+configurations { jbehave }
 
 task wrapper(type: Wrapper) {
-	gradleVersion = '1.10'
+    gradleVersion = '1.10'
 }
 
-
 task cleanOthers(type: Delete) << {
-	def File srcDir = new File('../' + project.name + '/target')
-	def collection = files { srcDir.listFiles() }
-	collection.collect { relativePath(it) }.sort().each { println 'deleting... ' + it ; delete it }
+    def File srcDir = new File('../' + project.name + '/target')
+    def collection = files { srcDir.listFiles() }
+    collection.collect { relativePath(it) }.sort().each { println 'deleting... ' + it ; delete it }
 
-//	srcDir = new File('../' + project.name + '/bin')
-//	collection = files { srcDir.listFiles() }
-//	collection.collect { relativePath(it) }.sort().each { println 'deleting... ' + it ; delete it }
-
-	// doesn't work :(
-	delete 'target'
-	//delete 'bin' 
+    // doesn't work :(
+    delete 'target'
 }
 
 clean.dependsOn cleanOthers
 
-configurations { jbehave }
+task sourcesJar(type: Jar, dependsOn:classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
 
-//test {
-//  onlyIf { false } // Disable standard tests
-//}
+// custom tasks for creating javadoc jar
+task javadocJar(type: Jar, dependsOn:javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+    
+// add the jars as artifacts
+artifacts {
+    archives jar
+    archives javadocJar
+    archives sourcesJar
+}
 
-//task acceptStories(type: Test) {
-//	ignoreFailures = true
-//	doFirst {
-//	  // Need 'target' directory on *nix systems to get any output
-//	  file('target').mkdirs()
-//  
-//	  def filter = System.getProperty('bdd.stories')
-//	  if (filter == null) {
-//		filter = '*'
-//	  }
-//	  def stories = sourceSets.test.resources.matching {
-//		it.include filter
-//	  }.asPath
-//	  systemProperty('bdd.stories', stories)
-//	}
-//  }
+signing {
+    sign configurations.archives
+}
+
+uploadArchives.dependsOn javadocJar, sourcesJar, jar
+
+uploadArchives {
+    repositories {
+        if (isDevBuild) {
+            mavenLocal()  // same as gradle install
+        }
+        else {
+            mavenDeployer {
+                if(isReleaseBuild) {
+                    beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+                }
+                 
+                repository(url: sonatypeRepositoryUrl) {
+                  authentication(userName: sonatypeUsername, password: sonatypePassword)
+                }
+     
+                pom.project {
+				   name 'Java-LogOnce'
+                   packaging 'jar'
+                   description 'SLF4J Java logging plugin for logging a message once so as not to spam the log file. Its useful for debugging production issues.'
+                   url 'https://github.com/smr-co-uk/java-logonce'
+                   
+                   scm {
+                       url 'scm:git@github.com:smr-co-uk/java-logonce.git'
+                       connection 'scm:git@github.com:smr-co-uk/java-logonce.git'
+                       developerConnection 'scm:git@github.com:smr-co-uk/java-logonce.git'
+                   }
+     
+                   licenses {
+                       license {
+                           name 'GNU GPL, Version 2.0'
+                           url 'https://github.com/smr-co-uk/java-logonce/blob/master/LICENSE'
+                           distribution 'repo'
+                       }
+                   }
+     
+                   developers {
+                       developer {
+                           id 'PeterLappo'
+                           name 'Peter Lappo'
+                       }
+                   }
+               }
+            }
+        }
+    }
+}
