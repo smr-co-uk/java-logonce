@@ -27,13 +27,13 @@ group = 'uk.co.smr'
 ext.packaging = 'jar'
 version = '0.1.2'
 
-def isDevBuild = true 
+def isDevBuild = false 
 def isReleaseBuild = false
 def isSnapshotBuild = false
 def sonatypeRepositoryUrl
 
 //set build variables based on build type (release, snapshot, development)
-if(hasProperty("release")) {
+if (hasProperty("release")) {
     isReleaseBuild = true
     sonatypeRepositoryUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2"
 } else if (hasProperty("snapshot")) {
