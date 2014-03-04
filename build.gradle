@@ -24,26 +24,27 @@ defaultTasks 'check'
 sourceCompatibility = 1.6
 targetCompatibility = 1.6
 group = 'uk.co.smr'
+ext.packaging = 'jar'
 version = '0.1.3'
 
-def isDevBuild = false 
 def isReleaseBuild = false
-def isSnapshotBuild = false
 def sonatypeRepositoryUrl
 
 //set build variables based on build type (release, snapshot, development)
 if (hasProperty("release")) {
+    println 'Release Build'
     isReleaseBuild = true
     sonatypeRepositoryUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2"
 } else if (hasProperty("snapshot")) {
-    isSnapshotBuild = true
+    println 'Snapshot Build'
     version += "-SNAPSHOT"
     sonatypeRepositoryUrl = "https://oss.sonatype.org/content/repositories/snapshots"
 } else {
-    isDevBuild = true
+    println 'Dev Build'
+    sonatypeRepositoryUrl = "file://${System.properties['user.home']}/.m2/repository"
 }
 
-println 'Config: isReleaseBuild=' + isReleaseBuild + ' isDevBuild=' + isDevBuild + ' isSnapshotBuild=' + isSnapshotBuild
+println 'Repo URL=' + sonatypeRepositoryUrl
 
 repositories {
     mavenCentral()
@@ -110,93 +111,51 @@ uploadArchives.dependsOn javadocJar, sourcesJar, jar
 
 uploadArchives {
 	repositories {
-		if (isDevBuild) {
-			mavenLocal()  // same as gradle install
-		}
-		else {
-			mavenDeployer {
-				if(isReleaseBuild) {
-					beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
-				}
+		mavenDeployer {
+			if(isReleaseBuild) {
+				beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+			}
 
-				repository(url: sonatypeRepositoryUrl) {
-					authentication(userName: sonatypeUsername, password: sonatypePassword)
-				}
+			repository(url: sonatypeRepositoryUrl) {
+				authentication(userName: sonatypeUsername, password: sonatypePassword)
+			}
 
-				pom {
-					project {
-						name 'Java-LogOnce'
-						packaging 'jar' // does not work?
-						description 'SLF4J Java logging plugin for logging a message once so as not to spam the log file. Its useful for debugging production issues.'
-						url 'https://github.com/smr-co-uk/java-logonce'
+			pom {
+				project {
+					name 'Java-LogOnce'
+					packaging 'jar' // does not work?
+					description 'SLF4J Java logging plugin for logging a message once so as not to spam the log file. Its useful for debugging production issues.'
+					url 'https://github.com/smr-co-uk/java-logonce'
 
-						scm {
-							url 'scm:git@github.com:smr-co-uk/java-logonce.git'
-							connection 'scm:git@github.com:smr-co-uk/java-logonce.git'
-							developerConnection 'scm:git@github.com:smr-co-uk/java-logonce.git'
-						}
-
-						licenses {
-							license {
-								name 'GNU GPL, Version 2.0'
-								url 'https://github.com/smr-co-uk/java-logonce/blob/master/LICENSE'
-								distribution 'repo'
-							}
-						}
-
-						developers {
-							developer {
-								id 'PeterLappo'
-								name 'Peter Lappo'
-							}
-						}
-					}
-					// hack to add packaging
-					withXml { root ->
-						def children = root.asNode().children()
-						def versionIndex = children.indexOf(children.find {it.name().localPart == 'version'})
-						children.add(versionIndex + 1, new Node(null, 'packaging', 'jar'))
+					scm {
+						url 'scm:git@github.com:smr-co-uk/java-logonce.git'
+						connection 'scm:git@github.com:smr-co-uk/java-logonce.git'
+						developerConnection 'scm:git@github.com:smr-co-uk/java-logonce.git'
 					}
 
+					licenses {
+						license {
+							name 'GNU GPL, Version 2.0'
+							url 'https://github.com/smr-co-uk/java-logonce/blob/master/LICENSE'
+							distribution 'repo'
+						}
+					}
+
+					developers {
+						developer {
+							id 'PeterLappo'
+							name 'Peter Lappo'
+						}
+					}
+				}
+				// hack to add packaging
+				withXml { root ->
+					def children = root.asNode().children()
+					def versionIndex = children.indexOf(children.find {it.name().localPart == 'version'})
+					children.add(versionIndex + 1, new Node(null, 'packaging', 'jar'))
 				}
 			}
 		}
 	}
 }
 
-task writeNewPom << {
-	pom {
-		project {
-			name 'Java-LogOnce'
-			description 'SLF4J Java logging plugin for logging a message once so as not to spam the log file. Its useful for debugging production issues.'
-			url 'https://github.com/smr-co-uk/java-logonce'
-			packaging 'jar'
-
-			scm {
-				url 'scm:git@github.com:smr-co-uk/java-logonce.git'
-				connection 'scm:git@github.com:smr-co-uk/java-logonce.git'
-				developerConnection 'scm:git@github.com:smr-co-uk/java-logonce.git'
-			}
-
-			licenses {
-				license {
-					name 'GNU GPL, Version 2.0'
-					url 'https://github.com/smr-co-uk/java-logonce/blob/master/LICENSE'
-					distribution 'repo'
-				}
-			}
-
-			developers {
-				developer {
-					id 'PeterLappo'
-					name 'Peter Lappo'
-				}
-			}
-		}
-		withXml { root ->
-			def children = root.asNode().children()
-			def versionIndex = children.indexOf(children.find {it.name().localPart == 'version'})
-			children.add(versionIndex + 1, new Node(null, 'packaging', 'jar'))
-		}
-	}.writeTo("$buildDir/newpom.xml")
-}
