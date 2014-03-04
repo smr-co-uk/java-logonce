@@ -29,9 +29,9 @@ public class ThreadSafeBloomFilterStrategy extends BloomFilterStrategy {
 
 	/**
 	 * @see BloomFilter
-	 * @param funnel the funnel of T's that the constructed {@code BloomFilter<T>} will use
+	 * 
 	 * @param expectedInsertions the number of expected insertions to the constructed
-	 *     {@code BloomFilter<T>}; must be positive, decimal fraction, eg. 0.03 for 3%
+	 * @param fpp false positive probability must be positive, decimal fraction, eg. 0.03 for 3%
 	 */
 	public ThreadSafeBloomFilterStrategy(int expectedInsertions, double fpp) {
 		filter = BloomFilter.create(Funnels.stringFunnel(Charset.defaultCharset()), expectedInsertions, fpp);
