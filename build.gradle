@@ -44,8 +44,8 @@ if (hasProperty("release")) {
     sonatypeRepositoryUrl = "https://oss.sonatype.org/content/repositories/snapshots"
 } else {
     println 'Dev Build'
-	def sonatypeUsername = "" 
-	def sonatypePassword = ""
+	def sonatypeUsername = "myname" 
+	def sonatypePassword = "mypasss"
     sonatypeRepositoryUrl = "file://${System.properties['user.home']}/.m2/repository"
 }
 
@@ -110,7 +110,9 @@ artifacts {
 }
 
 signing {
-    sign configurations.archives
+	if (!isDevBuild) {
+		sign configurations.archives
+	}
 }
 
 uploadArchives.dependsOn javadocJar, sourcesJar, jar
@@ -122,8 +124,8 @@ uploadArchives {
 				beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
 			}
 
-			if (!isDevBuild) {
-				repository(url: sonatypeRepositoryUrl) {
+			repository(url: sonatypeRepositoryUrl) {
+				if (!isDevBuild) {
 					authentication(userName: sonatypeUsername, password: sonatypePassword)
 				}
 			}
