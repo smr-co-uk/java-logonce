@@ -1,8 +1,22 @@
 java-logonce
 ============
+Logonce is useful for investigating production issues and reducing log overhead when 
+there is a risk of logging a large number of repeated message.
+
 ## User Story
-As a developer I want to log state so that I can debug a production issue without adding a lot of duplicates to the log file 
-and I want to use my existing logging framework.
+As a developer I want to log detailed log messages without the risk of spamming the log 
+in addition I want to reuse my existing Java logging framework.
+
+## To Install
+Maven central http://repo1.maven.org/maven2/uk/co/smr/logonce/
+* groupId = 'uk.co.smr' 
+* artifactId = logonce
+* version = 0.1.2
+* gradle = 'uk.co.smr:logonce:0.1.2'
+
+Or clone from github https://github.com/smr-co-uk/java-logonce.git 
+
+The project is configured to work with Eclipse http://www.eclipse.org/
 
 ## Description
 This is an slf4j logger that only logs on the first instance of message it sees 
@@ -40,11 +54,6 @@ There are three constructors as follows:-
 * new LogOnce(logger, prefix, MatchingStrategy);
  * As above but include / exclude the prefix
 
-## To Install
-Clone from github https://github.com/smr-co-uk/java-logonce.git or download a zip file 
-https://github.com/smr-co-uk/java-logonce/archive/master.zip
-The project is configured to work with Eclipse http://www.eclipse.org/
-
 ## To Test
 After installing, on U/Linux in a terminal window type
 ```
@@ -57,5 +66,5 @@ gradlew.bat check
 ```
 
 ## Road Map
-* Add maven central repository support.
+* No further features are planned.
 
