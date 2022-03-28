@@ -1,5 +1,6 @@
 package uk.co.smr.slf4j.logonce;
 
+import static org.apache.logging.log4j.Level.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -10,13 +11,14 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 
+import org.slf4j.event.Level;
 import org.jbehave.core.annotations.AfterStories;
 import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.Named;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.slf4j.LoggerFactory;
-import org.slf4j.ext.XLogger.Level;
+//import org.slf4j.ext.XLogger.Level;
 
 import uk.co.smr.slf4j.logonce.MatchingStrategyFactory.Reliability;
 import uk.co.smr.slf4j.logonce.MatchingStrategyFactory.Safety;

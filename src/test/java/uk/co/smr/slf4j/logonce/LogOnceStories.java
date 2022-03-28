@@ -1,8 +1,6 @@
 package uk.co.smr.slf4j.logonce;
 
-import java.util.Arrays;
-import java.util.List;
-
+import com.github.valfirst.jbehave.junit.monitoring.JUnitReportingRunner;
 import org.jbehave.core.annotations.UsingEmbedder;
 import org.jbehave.core.configuration.Configuration;
 import org.jbehave.core.configuration.MostUsefulConfiguration;
@@ -16,13 +14,14 @@ import org.jbehave.core.steps.InjectableStepsFactory;
 import org.jbehave.core.steps.InstanceStepsFactory;
 import org.junit.runner.RunWith;
 
-import de.codecentric.jbehave.junit.monitoring.JUnitReportingRunner;
+import java.util.Arrays;
+import java.util.List;
 
-@RunWith(JUnitReportingRunner.class)
-@UsingEmbedder(embedder = Embedder.class, generateViewAfterStories = true,
-	ignoreFailureInStories = true, ignoreFailureInView = false,  verboseFailures = true)
+
+//@RunWith(JUnitReportingRunner.class)
+//@UsingEmbedder(embedder = Embedder.class, generateViewAfterStories = true,
+//	ignoreFailureInStories = true, ignoreFailureInView = false,  verboseFailures = true)
 public class LogOnceStories extends JUnitStories {
- 
     // Here we specify the configuration, starting from default MostUsefulConfiguration, and changing only what is needed
     @Override
     public Configuration configuration() {

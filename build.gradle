@@ -15,17 +15,17 @@ or
 
 apply plugin: 'java'
 apply plugin: 'eclipse'
-apply plugin: 'maven'
+apply plugin: 'maven-publish'
 apply plugin: 'signing'
 apply plugin: 'idea'
 
 defaultTasks 'check'
 
-sourceCompatibility = 1.6
-targetCompatibility = 1.6
+sourceCompatibility = 11
+targetCompatibility = 11
 group = 'uk.co.smr'
 ext.packaging = 'jar'
-version = '0.1.3'
+version = '0.1.4'
 
 def isReleaseBuild = false
 def isDevBuild = true
@@ -64,29 +64,30 @@ repositories {
 }
 
 dependencies {
-    compile 'org.apache.logging.log4j:log4j-api:2.0-rc1'                  
-    compile 'org.apache.logging.log4j:log4j-core:2.0-rc1'                  
-    compile 'org.apache.logging.log4j.adapters:log4j-slf4j-impl:2.0-beta4'     // beta     
-    compile 'com.google.guava:guava:16.0'
-    compile 'org.slf4j:slf4j-api:1.7.6'                                 
-    testCompile 'de.codecentric:jbehave-junit-runner:1.1.0'
-    testCompile group: 'junit', name: 'junit', version: '4.11'
-    testCompile 'org.jbehave:jbehave-core:4.0-beta-4'                        // beta    
+    implementation 'org.apache.logging.log4j:log4j-api:2.17.1'
+    implementation 'org.apache.logging.log4j:log4j-core:2.17.1'
+    testImplementation 'org.apache.logging.log4j:log4j-slf4j-impl:2.17.2'
+    implementation 'com.google.guava:guava:16.0'
+    implementation 'org.slf4j:slf4j-api:1.7.36'
+	testImplementation 'io.cucumber:cucumber-java:7.2.3'
+	testImplementation 'io.cucumber:cucumber-junit:7.2.3'
+    implementation 'com.github.valfirst:jbehave-junit-runner:2.0.0'
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.jbehave:jbehave-core:4.8.3'
 }
 
 configurations { jbehave }
 
-task wrapper(type: Wrapper) {
-    gradleVersion = '1.10'
-}
 
-task cleanOthers(type: Delete) << {
-    def File srcDir = new File('../' + project.name + '/target')
-    def collection = files { srcDir.listFiles() }
-    collection.collect { relativePath(it) }.sort().each { println 'deleting... ' + it ; delete it }
+task cleanOthers(type: Delete) {
+	doLast {
+		def File srcDir = new File('../' + project.name + '/target')
+		def collection = files { srcDir.listFiles() }
+		collection.collect { relativePath(it) }.sort().each { println 'deleting... ' + it; delete it }
 
-    // doesn't work :(
-    delete 'target'
+		// doesn't work :(
+		delete 'target'
+	}
 }
 
 clean.dependsOn cleanOthers
@@ -116,57 +117,93 @@ signing {
 	}
 }
 
-uploadArchives.dependsOn javadocJar, sourcesJar, jar
+//publishing {
+//	publications {
+//		mavenJava(MavenPublication) {
+//			pom {
+//				name 'Java-LogOnce'
+//				packaging 'jar' // does not work?
+//				description 'SLF4J Java logging plugin for logging a message once so as not to spam the log file. Its useful for debugging production issues.'
+//				url 'https://github.com/smr-co-uk/java-logonce'
+//
+//				scm {
+//					url 'scm:git@github.com:smr-co-uk/java-logonce.git'
+//					connection 'scm:git@github.com:smr-co-uk/java-logonce.git'
+//					developerConnection 'scm:git@github.com:smr-co-uk/java-logonce.git'
+//				}
+//
+//				licenses {
+//					license {
+//						name 'GNU GPL, Version 2.0'
+//						url 'https://github.com/smr-co-uk/java-logonce/blob/master/LICENSE'
+//						distribution 'repo'
+//					}
+//				}
+//
+//				developers {
+//					developer {
+//						id 'PeterLappo'
+//						name 'Peter Lappo'
+//					}
+//				}
+//			}
+//		}
+//	}
+//}
 
-uploadArchives {
-	repositories {
-		mavenDeployer {
-			if (isReleaseBuild) {
-				beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
-			}
+//tasks.publishing.dependsOn javadocJar, sourcesJar, jar
 
-			repository(url: sonatypeRepositoryUrl) {
-				if (!isDevBuild) {
-					authentication(userName: sonatypeUsername, password: sonatypePassword)
-				}
-			}
 
-			pom {
-				project {
-					name 'Java-LogOnce'
-					packaging 'jar' // does not work?
-					description 'SLF4J Java logging plugin for logging a message once so as not to spam the log file. Its useful for debugging production issues.'
-					url 'https://github.com/smr-co-uk/java-logonce'
 
-					scm {
-						url 'scm:git@github.com:smr-co-uk/java-logonce.git'
-						connection 'scm:git@github.com:smr-co-uk/java-logonce.git'
-						developerConnection 'scm:git@github.com:smr-co-uk/java-logonce.git'
-					}
-
-					licenses {
-						license {
-							name 'GNU GPL, Version 2.0'
-							url 'https://github.com/smr-co-uk/java-logonce/blob/master/LICENSE'
-							distribution 'repo'
-						}
-					}
-
-					developers {
-						developer {
-							id 'PeterLappo'
-							name 'Peter Lappo'
-						}
-					}
-				}
-				// hack to add packaging
-				withXml { root ->
-					def children = root.asNode().children()
-					def versionIndex = children.indexOf(children.find {it.name().localPart == 'version'})
-					children.add(versionIndex + 1, new Node(null, 'packaging', 'jar'))
-				}
-			}
-		}
-	}
-}
+//uploadArchives {
+//	repositories {
+//		mavenDeployer {
+//			if (isReleaseBuild) {
+//				beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+//			}
+//
+//			repository(url: sonatypeRepositoryUrl) {
+//				if (!isDevBuild) {
+//					authentication(userName: sonatypeUsername, password: sonatypePassword)
+//				}
+//			}
+//
+//			pom {
+//				project {
+//					name 'Java-LogOnce'
+//					packaging 'jar' // does not work?
+//					description 'SLF4J Java logging plugin for logging a message once so as not to spam the log file. Its useful for debugging production issues.'
+//					url 'https://github.com/smr-co-uk/java-logonce'
+//
+//					scm {
+//						url 'scm:git@github.com:smr-co-uk/java-logonce.git'
+//						connection 'scm:git@github.com:smr-co-uk/java-logonce.git'
+//						developerConnection 'scm:git@github.com:smr-co-uk/java-logonce.git'
+//					}
+//
+//					licenses {
+//						license {
+//							name 'GNU GPL, Version 2.0'
+//							url 'https://github.com/smr-co-uk/java-logonce/blob/master/LICENSE'
+//							distribution 'repo'
+//						}
+//					}
+//
+//					developers {
+//						developer {
+//							id 'PeterLappo'
+//							name 'Peter Lappo'
+//						}
+//					}
+//				}
+//				// hack to add packaging
+//				withXml { root ->
+//					def children = root.asNode().children()
+//					def versionIndex = children.indexOf(children.find {it.name().localPart == 'version'})
+//					children.add(versionIndex + 1, new Node(null, 'packaging', 'jar'))
+//				}
+//			}
+//		}
+//	}
+//}
 
