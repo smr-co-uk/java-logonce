@@ -16,10 +16,10 @@ import com.google.common.base.Preconditions;
  * against too many messages hitting a log file or if an error condition needs to be logged but
  * only once. It uses slf4j for greater portability and more efficient logging. 
  * 
- * >p>Different matching strategies can used for either efficient storage but with some messages being logged twice
+ * <p>Different matching strategies can used for either efficient storage but with some messages being logged twice
  * or less efficient storage and no messages logged twice. 
  * 
- * <p>The class follows the slf4j pattern by checking the is<level>Enabled first.
+ * <p>The class follows the slf4j pattern by checking the is"level"Enabled first.
  * <p>
  * This class is thread safe but the strategy may not be.
  * <p>
